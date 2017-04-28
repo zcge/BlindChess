@@ -1,4 +1,5 @@
-let Piece = require("../Pieces/Piece.js")
+let Piece = require("../Pieces/Piece.js");
+let piece = new Piece();
 class ChessBoard {
     constructor() {
         //棋盘内的所有内容
@@ -46,6 +47,7 @@ class ChessBoard {
                 v:v,
                 point:point
             }
+            console.log(this.clicked);
             this.points = this.pointsCanMove();
         }else{
             this.clicked = null;
@@ -54,14 +56,21 @@ class ChessBoard {
     }
     //预测能移动的位置
     pointsCanMove(){
-        let Points = [];
+        let Points = piece.getMoveRule(this.clicked.v)(this.clicked.v, this.clicked.point, this.map);
+        console.info(Points,"-----");
         return Points;
     }
     //移动棋子 移动到可以移动的位置 生成移动指令
     movePiece(pointTo){
         //如果能够移动就移动
-        let canMove = true;
-        if(canMove){
+        let flag = false;
+        for(let i = 0;i<this.points.length;i++){
+            if(pointTo.x ==this.points[i].x && pointTo.y==this.points[i].y){
+                flag = true;
+                break;
+            }
+        }
+        if(flag){
             let pointFrom = this.clicked.point;
             this.map[pointFrom.y][pointFrom.x] = "#";
             this.map[pointTo.y][pointTo.x] = this.clicked.v;

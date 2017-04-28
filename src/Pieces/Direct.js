@@ -20,14 +20,6 @@ class Direct{
             
         }
 
-        // let name = "";
-        // let movePoint = {
-        // }
-        // let toPoint = {
-        // }
-        // return {
-        //     name,movePoint,toPoint
-        // }
     }
     //构建指令字符串
     buildDirectStr(type,movePoint,toPoint){

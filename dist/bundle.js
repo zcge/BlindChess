@@ -8272,7 +8272,8 @@
 /* 300 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	let Piece = __webpack_require__(301)
+	let Piece = __webpack_require__(301);
+	let piece = new Piece();
 	class ChessBoard {
 	    constructor() {
 	        //棋盘内的所有内容
@@ -8320,6 +8321,7 @@
 	                v:v,
 	                point:point
 	            }
+	            console.log(this.clicked);
 	            this.points = this.pointsCanMove();
 	        }else{
 	            this.clicked = null;
@@ -8328,14 +8330,21 @@
 	    }
 	    //预测能移动的位置
 	    pointsCanMove(){
-	        let Points = [];
+	        let Points = piece.getMoveRule(this.clicked.v)(this.clicked.v, this.clicked.point, this.map);
+	        console.info(Points,"-----");
 	        return Points;
 	    }
 	    //移动棋子 移动到可以移动的位置 生成移动指令
 	    movePiece(pointTo){
 	        //如果能够移动就移动
-	        let canMove = true;
-	        if(canMove){
+	        let flag = false;
+	        for(let i = 0;i<this.points.length;i++){
+	            if(pointTo.x ==this.points[i].x && pointTo.y==this.points[i].y){
+	                flag = true;
+	                break;
+	            }
+	        }
+	        if(flag){
 	            let pointFrom = this.clicked.point;
 	            this.map[pointFrom.y][pointFrom.x] = "#";
 	            this.map[pointTo.y][pointTo.x] = this.clicked.v;
@@ -8373,20 +8382,13 @@
 
 /***/ }),
 /* 301 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
+	let ChessIterator = __webpack_require__(302);
+	let Check = __webpack_require__(303)
 	class Piece {
 	    constructor() {
 	
-	    }
-	    isSameCamp(v, v2) {
-	        if (/[A-Z]/.test(v1) && /[A-Z]/.test(v2)) {
-	            return true;
-	        }
-	        if (/[a-z]/.test(v1) && /[a-z]/.test(v2)) {
-	            return true;
-	        }
-	        return false;
 	    }
 	    getMoveRule(v) {
 	        v = v.toUpperCase();
@@ -8416,47 +8418,122 @@
 	
 	        }
 	    }
-	    CFun() {
+	    //棋子的值,点,和当前棋盘的地图
+	    CFun(v, point, map) {
 	        let points = [];
+	        ChessIterator.directionWASD((vertor) => {
+	            for (let unit = 1; unit <= 9; unit++) {
+	                if (Check.isOutOfbounds(point, vertor, unit) || Check.isHitFriend(point, vertor, unit, map, v)) {
+	                    break;
+	                }
+	                if (Check.isHitNotFriend(point, vertor, unit, map, v)) {
+	                    points.push(Check.getMovePoint(point, vertor, unit));
+	                    break;
+	                }
+	                if (Check.isHitEmpty(point, vertor, unit, map)) {
+	                    points.push(Check.getMovePoint(point, vertor, unit));
+	                }
+	            }
+	        })
 	        return points;
 	    }
-	    MFun() {
+	    PFun(v, point, map) {
 	        let points = [];
-	        return points;
-	    }
-	    PFun() {
-	        let points = [];
-	        return points;
-	    }
-	    XFun(point, v, map) {
-	        let points = [];
-	        
-	        
-	        
+	        ChessIterator.directionWASD((vertor) => {
+	            var flag = false;
+	            for (let unit = 1; unit <= 9; unit++) {
+	                if (Check.isOutOfbounds(point, vertor, unit)) {
+	                    break;
+	                }
+	                if (!Check.isHitEmpty(point, vertor, unit, map, v)) {
+	                    if (flag == false) {
+	                        flag = true;
+	                        continue;
+	                    } else {
+	                        if (Check.isHitNotFriend(point, vertor, unit, map, v)) {
+	                            points.push(Check.getMovePoint(point, vertor, unit));
+	                            break;
+	                        }
+	                        if(Check.isHitFriend(point, vertor, unit, map, v)){
+	                            break;
+	                        }
+	                        
+	                    }
+	                }
+	                if (Check.isHitEmpty(point, vertor, unit, map)) {
+	                    if (flag == false) {
+	                        points.push(Check.getMovePoint(point, vertor, unit));
+	                    }
+	                }
+	            }
+	        });
 	        return points;
 	    }
 	    // 士
-	    SFun(point, v, map) {
+	    SFun(v, point, map) {
 	        let points = [];
-	        if (point.x == 3 || point.x == 5 && !this.isSameCamp(map[8][4], v)) {
-	            points = [{ x: 4, y: 8 }]
-	            return points;
-	        }
-	        if (points.x = 4) {
-	            let arr = [{ x: 3, y: 7 }, { x: 3, y: 9 }, { x: 5, y: 7 }, { x: 5, y: 9 }];
-	            for (let i = 0; i < arr.length; i++) {
-	                if (!this.isSameCamp(map[arr[i].y][arr[i].x], v)) {
-	                    points.push(arr[i]);
-	                }
-	            }
-	        }
+	        ChessIterator.directQECZ((vertor) => {
+	            if (!Check.isOutOfboundsS(point, vertor, 1) && !Check.isHitFriend(point, vertor, 1, map, v)) {
+	                points.push(Check.getMovePoint(point, vertor, 1));
+	            };
+	        });
 	        return points;
 	    }
-	    // 兵
-	    BFun(point, v, map) {
-	        let isSameCamp = this.isSameCamp(chessboard[point.y - 1][points.x], v);
+	
+	    JFun(v, point, map) {
 	        let points = [];
-	        
+	        ChessIterator.directionWASD((vertor) => {
+	            if (!Check.isOutOfboundsS(point, vertor, 1) && !Check.isHitFriend(point, vertor, 1, map, v)) {
+	                points.push(Check.getMovePoint(point, vertor, 1));
+	            };
+	        });
+	        return points;
+	    }
+	
+	    MFun(v, point, map) {
+	        let points = [];
+	        // debugger;
+	        ChessIterator.directionM((vertor) => {
+	            // 计算这个方向的马眼
+	            let eye = {
+	                x: 0,
+	                y: 0
+	            };
+	            if (Math.abs(vertor.x) == 2) {
+	                eye.x = vertor.x / 2;
+	            } else {
+	                eye.y = vertor.y / 2;
+	            }
+	            if (!Check.isOutOfbounds(point, vertor, 1) && Check.isHitEmpty(point, eye, 1,map) && !Check.isHitFriend(point, vertor, 1, map, v)) {
+	                points.push(Check.getMovePoint(point, vertor, 1));
+	            }
+	        });
+	        return points;
+	    }
+	    XFun( v,point, map) {
+	        let points = [];
+	        ChessIterator.directQECZ((vertor) => {
+	            if (!Check.isOutOfboundsX(point, vertor, 2) && Check.isHitEmpty(point, vertor, 1, map) && !Check.isHitFriend(point, vertor, 2, map, v)) {
+	                points.push(Check.getMovePoint(point, vertor, 2));
+	            }
+	        });
+	        return points;
+	    }
+	
+	    // 兵
+	    BFun( v,point, map) {
+	        let points = [];
+	        if (point.y >= 5) {
+	            if (!Check.isHitFriend(point, { x: 0, y: -1 }, 1, map, v)) {
+	                points.push(Check.getMovePoint(point, { x: 0, y: -1 }, 1));
+	            }
+	        } else {
+	            ChessIterator.directionBing((vertor) => {
+	                if (!Check.isOutOfbounds(point, vertor, 1) && !Check.isHitFriend(point, vertor, 1, map, v)) {
+	                    points.push(Check.getMovePoint(point, vertor, 1));
+	                }
+	            });
+	        }
 	        return points;
 	    }
 	
@@ -8464,6 +8541,143 @@
 	module.exports = Piece
 	
 
+
+/***/ }),
+/* 302 */
+/***/ (function(module, exports) {
+
+	// 遍历器
+	class ChessIterator {
+	    constructor() {
+	
+	    }
+	    static directionBing(cb) {
+	        //上左右
+	        let directArr = [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: -1, y: 0 }];
+	        for (let i = 0; i < 3; i++) {
+	            let vector = directArr[i]
+	            cb(vector);
+	        }
+	    }
+	    static directionM(cb) {
+	        let directArr = [{ x: -1, y: 2 }, { x: -1, y: -2 }, { x: 1, y: 2 }, { x: 1, y: -2 }, { x: 2, y: 1 }, { x: -2, y: 1 }, { x: 2, y: -1 }, { x: -2, y: -1 }];
+	        for (let i = 0; i < 8; i++) {
+	            let vector = directArr[i]
+	            cb(vector);
+	        }
+	    }
+	    static directionWASD(cb) {
+	        //上下左右
+	        let directArr = [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }];
+	        for (let i = 0; i < 4; i++) {
+	            let vector = directArr[i]
+	            cb(vector);
+	        }
+	    }
+	    static directQECZ(cb) {
+	        let directArr = [{ x: -1, y: -1 }, { x: 1, y: -1 }, { x: 1, y: 1 }, { x: -1, y: 1 }];
+	        for (let i = 0; i < 4; i++) {
+	            let vector = directArr[i]
+	            cb(vector);
+	        }
+	    }
+	
+	}
+	module.exports = ChessIterator;
+
+
+/***/ }),
+/* 303 */
+/***/ (function(module, exports) {
+
+	//检测方法
+	let Check = {
+	    //检测是否是友方单位
+	    isFriend: (v1, v2) => {
+	        if (v1 == "#" || v2 == "#") {
+	            return false;
+	        }
+	        if (/[A-Z]/.test(v1) && /[A-Z]/.test(v2)) {
+	            return true;
+	        }
+	        if (/[a-z]/.test(v1) && /[a-z]/.test(v2)) {
+	            return true;
+	        }
+	        return false;
+	    },
+	    //检测是敌对单位
+	    isNotFriend: (v1, v2) => {
+	        if (v1 == "#" || v2 == "#") {
+	            return false;
+	        }
+	        if (/[A-Z]/.test(v1) && /[a-z]/.test(v2)) {
+	            return true;
+	        }
+	        if (/[a-z]/.test(v1) && /[A-Z]/.test(v2)) {
+	            return true;
+	        }
+	        return false;
+	    },
+	    getMapV: (point, vertor, unit, map) => {
+	        let v = map[point.y + vertor.y * unit][point.x + vertor.x * unit];
+	        return v;
+	    },
+	    //获得移动后的点
+	    getMovePoint: (point, vertor, unit) => {
+	        let pointTo = {
+	            x: point.x + vertor.x * unit,
+	            y: point.y + vertor.y * unit
+	        };
+	        return pointTo;
+	    },
+	    //象的边界
+	    isOutOfboundsX: (point, vertor, unit) => {
+	        if ((point.x + vertor.x * unit) > 8 || (point.x + vertor.x * unit) < 0) {
+	            return true;
+	        }
+	        if ((point.y + vertor.y * unit) > 9 || (point.y + vertor.y * unit) < 5) {
+	            return true;
+	        }
+	        return false;
+	    },
+	    //棋盘的边界
+	    isOutOfbounds: (point, vertor, unit) => {
+	        if ((point.x + vertor.x * unit) > 8 || (point.x + vertor.x * unit) < 0) {
+	            return true;
+	        }
+	        if ((point.y + vertor.y * unit) > 9 || (point.y + vertor.y * unit) < 0) {
+	            return true;
+	        }
+	        return false;
+	    },
+	    //马的边界
+	    isOutOfboundsS: (point, vertor, unit) => {
+	        if ((point.x + vertor.x * unit) > 5 || (point.x + vertor.x * unit) < 3) {
+	            return true;
+	        }
+	        if ((point.y + vertor.y * unit) > 9 || (point.y + vertor.y * unit) < 7) {
+	            return true;
+	        }
+	        return false;
+	    },
+	    //是否是空的
+	    isHitEmpty: (point, vertor, unit, map) => {
+	        let v = Check.getMapV(point, vertor, unit, map);
+	        if (v == "#") {
+	            return true;
+	        } else {
+	            return false;
+	        }
+	    },
+	    //是否撞到友军
+	    isHitFriend: (point, vertor, unit, map, v) => {
+	        return Check.isFriend(Check.getMapV(point, vertor, unit, map), v);
+	    },
+	    isHitNotFriend: (point, vertor, unit, map, v) => {
+	        return Check.isNotFriend(Check.getMapV(point, vertor, unit, map), v);
+	    }
+	}
+	module.exports = Check;
 
 /***/ })
 /******/ ]);
