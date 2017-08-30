@@ -2,14 +2,49 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no, email=no" />
     <title>Document</title>
     <style>
-        .piece{
-            width:40px;
-            height:40px;
+        .piece {
+            width: 40px;
+            height: 40px;
+        }
+        .directCodeV{
+            overflow-y: scroll;
+            height: 200px;
+            background-color: #ccc;
+            display: none;
+        }
+        #chess {
+            margin: 0 auto;
+            height: 567px;
+            width: 507px;
+            position: relative;
+            background-image: url("./img/stype_2/bg.png");
+            background-size: 100% 100%;
+            -webkit-transform: scale(0.5);
+            left: -70px;
+            top: 100px;
+        }
+
+        button {
+            background: #ccc;
+        }
+
+        .directPlane {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .black{
+            display: none;
+        }
+        .red{
+            display: none;
         }
     </style>
 </head>
@@ -18,8 +53,170 @@
     <div id="chess">
 
     </div>
+    
+    <div class="directPlane">
+        <div class="choosePlayer">
+            <button id="chooseRed">选择红方</button>
+            <button id="chooseBlack">选择黑方</button>
+            <button id="show">显示棋盘</button>
+            <button id="hide">影藏棋盘</button>
+            <button id="sure">确定模式</button>
+        </div>
+        指令集合:
+        <div class="directCode"></div>
+        <div class="directCodeV">
+            
+        </div>
+        <div class="black">
+            <div>
+                <button value='J' class="pieceCode">将</button>
+                <button value='X' class="pieceCode">象</button>
+                <button value='M' class="pieceCode">马</button>
+                <button value='C' class="pieceCode">车</button>
+                <button value='B' class="pieceCode">卒</button>
+                <button value='P' class="pieceCode">炮</button>
+                <button value='S' class="pieceCode">士</button>
+            </div>
+            <div>
+                <button value='9' class="pieceCode">9 </button>
+                <button value='8' class="pieceCode">8 </button>
+                <button value='7' class="pieceCode">7 </button>
+                <button value='6' class="pieceCode">6 </button>
+                <button value='5' class="pieceCode">5 </button>
+                <button value='4' class="pieceCode">4 </button>
+                <button value='3' class="pieceCode">3 </button>
+                <button value='2' class="pieceCode">2 </button>
+                <button value='1' class="pieceCode">1 </button>
+            </div>
+            <div>
+                <button value='v' class="pieceCode">进</button>
+                <button value='t' class="pieceCode">退</button>
+                <button value='r' class="pieceCode">平</button>
+            </div>
+            <div>
+                <button value='q' class="pieceCode">前</button>
+                <button value='z' class="pieceCode">中</button>
+                <button value='h' class="pieceCode">后</button>
+            </div>
+            <div>
 
-    <script src="./bundle.js">
+                <button id="blackBtn">
+                    发送
+                </button>
+                <button class="cancle">
+                    取消
+                </button>
+            </div>
+        </div>
+
+        <div class="red">
+            <div>
+                <button value='j' class="pieceCode">帅</button>
+                <button value='x' class="pieceCode">相</button>
+                <button value='m' class="pieceCode">马</button>
+                <button value='c' class="pieceCode">车</button>
+                <button value='b' class="pieceCode">兵</button>
+                <button value='p' class="pieceCode">炮</button>
+                <button value='s' class="pieceCode">士</button>
+            </div>
+            <div>
+                <button value='9' class="pieceCode">九</button>
+                <button value='8' class="pieceCode">八</button>
+                <button value='7' class="pieceCode">七</button>
+                <button value='6' class="pieceCode">六</button>
+                <button value='5' class="pieceCode">五</button>
+                <button value='4' class="pieceCode">四</button>
+                <button value='3' class="pieceCode">三</button>
+                <button value='2' class="pieceCode">二</button>
+                <button value='1' class="pieceCode">一</button>
+            </div>
+            <div>
+                <button value='v' class="pieceCode">进</button>
+                <button value='t' class="pieceCode">退</button>
+                <button value='r' class="pieceCode">平</button>
+            </div>
+            <div>
+                <button value='q' class="pieceCode">前</button>
+                <button value='z' class="pieceCode">中</button>
+                <button value='h' class="pieceCode">后</button>
+               
+            </div>
+            <div>
+                <button id="redBtn">
+                    发送
+                </button>
+                <button class="cancle">
+                    取消
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src='./jquery.js'></script>
+    <script src='./browserMqtt.js'></script>
+    <script src="./bundle.js"></script>
+    <script>
+        var directCode = [];
+        var client = mqtt.connect("ws://30.5.80.51:3000");
+        client.subscribe("chessRed");
+        client.subscribe("chessBlack");
+        client.on("message", function (topic, payload) {
+            if ([topic].join("") == 'chessRed') {
+                a.acceptRed(JSON.parse([payload].join("")),function(v){
+                    $(".directCodeV").append(v+"<br />")
+                });
+            } else if ([topic].join("") == 'chessBlack') {
+                a.acceptBlack(JSON.parse([payload].join("")),function(v){
+                    $(".directCodeV").append(v+"<br />")
+                });
+            }
+            console.log([topic, payload].join(": "))
+        });
+
+        $("body").on("click", ".pieceCode", function () {
+            if (directCode.length < 4) {
+                directCode.push($(this).val());
+            }
+            $('.directCode').html(directCode.join(""));
+        });
+        $("body").on("click",".cancle",function(){
+            directCode.pop();
+            $('.directCode').html(directCode.join(""));
+        });
+        $("body").on("click", "#redBtn", function () {
+            client.publish("chessRed", JSON.stringify(directCode));
+            directCode = [];
+            $('.directCode').html(directCode.join(""));
+        });
+        $("body").on("click", "#blackBtn", function () {
+             client.publish("chessBlack", JSON.stringify(directCode));
+             directCode = [];
+             $('.directCode').html(directCode.join(""));
+        });
+        $("body").on('click',"#chooseRed",function(){
+            a.init(0,function(){
+                a.show()
+            });
+           
+
+            $(".black").hide();
+            $(".red").show();
+        });
+        $("body").on('click',"#chooseBlack",function(){
+            a.init(1,function(){a.show()});
+            $(".black").show();
+            $(".red").hide();
+        });
+        $("body").on("click","#show",function(){
+            $(".directCodeV").hide();
+            $("#chess").show();
+        });
+        $("body").on("click","#hide",function(){
+             $(".directCodeV").show();
+            $("#chess").hide();
+        });
+        $("body").on("click","#sure",function(){
+            $(".choosePlayer").hide();
+        })
     </script>
 </body>
 

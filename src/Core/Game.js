@@ -10,8 +10,6 @@ class Game{
     init(){
         this.pace = [];
         this.chessBoard.init();
-        this.chessBoard.show();
     }
-    
 }
 module.exports = Game;
